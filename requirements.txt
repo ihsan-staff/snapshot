@@ -2,5 +2,7 @@ streamlit
 plotly
 pandas
 gspread
+google.colab
 google.auth
 numpy
+sklearn.cluster
