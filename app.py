@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import gspread
-from google.colab import auth
+#from google.colab import auth
 import google.auth
 from sklearn.cluster import KMeans
 import numpy as np
