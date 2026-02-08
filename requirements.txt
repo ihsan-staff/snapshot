@@ -4,4 +4,4 @@ pandas
 numpy
 gspread
 google-auth
-sklearn-cluster
+scikit-learn
