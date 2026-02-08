@@ -23,26 +23,29 @@ def format_dpw_list(dpw_string, max_per_line=4):
     return '<br>'.join(formatted_lines)
 
 @st.cache_data(ttl=3600) # Cache data for 1 hour
-def load_data():
+#def load_data():
     # Otorisasi Google Colab untuk mengakses Google Drive Anda
-    auth.authenticate_user()
+#    auth.authenticate_user()
 
     # Dapatkan kredensial yang diautentikasi dari Google Colab
-    credentials, project = google.auth.default()
+#    credentials, project = google.auth.default()
 
     # Buat client gspread menggunakan kredensial
-    gc = gspread.Client(auth=credentials)
+#    gc = gspread.Client(auth=credentials)
 
     # Masukkan URL Google Sheet Anda di sini
-    gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/edit?resourcekey=&gid=2051840082#gid=2051840082"
+#    gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/edit?resourcekey=&gid=2051840082#gid=2051840082"
 
     try:
         # Buka spreadsheet berdasarkan URL
-        spreadsheet = gc.open_by_url(gsheet_url)
-        worksheet = spreadsheet.worksheet(spreadsheet.worksheets()[0].title) # Mengambil worksheet pertama
-        data = worksheet.get_all_records()
-        df = pd.DataFrame(data)
+#        spreadsheet = gc.open_by_url(gsheet_url)
+#        worksheet = spreadsheet.worksheet(spreadsheet.worksheets()[0].title) # Mengambil worksheet pertama
+#        data = worksheet.get_all_records()
+	
+	gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/gviz/tq?tqx=out:csv"	
+#        df = pd.DataFrame(data)
 
+	df = pd.read_csv(gsheet_url)
         df = df.rename(columns={
             'Email Address': 'Email',
             'Asal DPW': 'DPW',
