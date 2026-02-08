@@ -45,7 +45,7 @@ def load_data():
         gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/gviz/tq?tqx=out:csv"	
 #        df = pd.DataFrame(data)
 
-	df = pd.read_csv(gsheet_url)
+        df = pd.read_csv(gsheet_url)
         df = df.rename(columns={
             'Email Address': 'Email',
             'Asal DPW': 'DPW',
