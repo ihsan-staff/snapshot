@@ -23,7 +23,7 @@ def format_dpw_list(dpw_string, max_per_line=4):
     return '<br>'.join(formatted_lines)
 
 @st.cache_data(ttl=3600) # Cache data for 1 hour
-#def load_data():
+def load_data():
     # Otorisasi Google Colab untuk mengakses Google Drive Anda
 #    auth.authenticate_user()
 
