@@ -42,7 +42,7 @@ def load_data():
 #        worksheet = spreadsheet.worksheet(spreadsheet.worksheets()[0].title) # Mengambil worksheet pertama
 #        data = worksheet.get_all_records()
 	
-	gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/edit?usp=sharing/gviz/tq?tqx=out:csv"	
+	gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/gviz/tq?tqx=out:csv"	
 #        df = pd.DataFrame(data)
 
 	df = pd.read_csv(gsheet_url)
