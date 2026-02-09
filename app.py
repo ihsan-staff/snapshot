@@ -233,7 +233,7 @@ if not df.empty:
     fig_personil_cluster.update_layout(
 #        title_text='Analisis Clustering Jumlah Personil BKAP DPW',
         height=1200,
-        showlegend=False
+        showlegend=True
     )
     fig_personil_cluster.update_xaxes(title_text="DPW", row=1, col=1)
     fig_personil_cluster.update_yaxes(title_text="Jumlah Personil", row=1, col=1)
