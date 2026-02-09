@@ -78,7 +78,7 @@ def load_data():
 df = load_data()
 
 if not df.empty:
-    st.title('Dashboard Analisis Snapshot BKAP DPW')
+    st.title('Dashboard Snapshot BKAP DPW')
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
