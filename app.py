@@ -78,12 +78,12 @@ def load_data():
 df = load_data()
 
 if not df.empty:
-    st.title('Dashboard Analisis Snapshot Respons BKAP DPW')
+    st.title('Dashboard Analisis Snapshot BKAP DPW')
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
 
-    st.subheader('Distribusi Jenjang Keanggotaan yang Dikelola per DPW')
+    st.subheader('Jenjang Keanggotaan yang dikelola BKAP DPW')
     df['Jenjang'] = df['Jenjang'].fillna('')
     jenjang_exploded = df.assign(Jenjang=df['Jenjang'].str.split(', ')).explode('Jenjang')
     jenjang_exploded['Jenjang'] = jenjang_exploded['Jenjang'].str.strip()
@@ -103,14 +103,14 @@ if not df.empty:
         x='DPW',
         y='Jumlah',
         color='Jenjang',
-        title='Distribusi Jenjang Keanggotaan yang Dikelola per DPW',
+#        title='Jenjang Keanggotaan yang dikelola BKAP DPW',
         labels={'DPW': 'DPW', 'Jenjang': 'Jenjang'},
         color_discrete_map=color_map,
         height=600
     )
     st.plotly_chart(fig_jenjang_dpw, use_container_width=True)
 
-    st.subheader('Distribusi Persentase DPW yang Mengelola Setiap Jenjang Keanggotaan')
+    st.subheader('Persentase DPW yang Mengelola Setiap Jenjang Keanggotaan')
     dpw_per_jenjang = jenjang_exploded.groupby('Jenjang')['DPW'].nunique().reset_index(name='Jumlah_DPW')
     total_dpw_unik = jenjang_exploded['DPW'].nunique()
     dpw_per_jenjang['Persentase_DPW'] = (dpw_per_jenjang['Jumlah_DPW'] / total_dpw_unik) * 100
@@ -122,7 +122,7 @@ if not df.empty:
         dpw_per_jenjang,
         x='Jenjang',
         y='Persentase_DPW',
-        title='Distribusi Persentase DPW yang Mengelola Setiap Jenjang Keanggotaan',
+#        title='Persentase DPW yang Mengelola Setiap Jenjang Keanggotaan',
         color='Jenjang',
         color_discrete_map=color_map,
         hover_data={'Jumlah_DPW': True, 'Formatted_DPW_List': True},
@@ -137,7 +137,7 @@ if not df.empty:
     )
     st.plotly_chart(fig_jenjang_percent, use_container_width=True)
 
-    st.subheader('Distribusi Persentase Kombinasi Jenjang Keanggotaan')
+    st.subheader('Persentase DPW berdasarkan Jenjang Keanggotaan yang Dikelola')
     df['Jenjang'] = df['Jenjang'].fillna('')
     jenjang_distribution = df['Jenjang'].value_counts(normalize=True).reset_index()
     jenjang_distribution.columns = ['Jenjang_Kombinasi', 'Persentase']
@@ -155,7 +155,7 @@ if not df.empty:
         jenjang_distribution,
         values='Persentase',
         names='Jenjang_Kombinasi',
-        title='Distribusi Persentase Kombinasi Jenjang Keanggotaan',
+        # title='Distribusi Persentase Kombinasi Jenjang Keanggotaan',
         hole=0.3,
         hover_data=['Jumlah_DPW', 'Formatted_DPW_List']
     )
@@ -168,7 +168,7 @@ if not df.empty:
     )
     st.plotly_chart(fig_jenjang_pie, use_container_width=True)
 
-    st.subheader('Analisis Clustering Jumlah Personil BKAP DPW')
+    st.subheader('Klaster BKAP DPW Berdasarkan Jumlah Personil')
     personil_per_dpw = df.groupby('DPW')['Personil'].sum().reset_index()
     X = personil_per_dpw[['Personil']].values.reshape(-1, 1)
     kmeans = KMeans(n_clusters=3, random_state=42, n_init='auto')
@@ -197,7 +197,7 @@ if not df.empty:
     cluster_counts['Formatted_DPW_List'] = cluster_counts['DPW_List'].apply(format_dpw_list)
 
     fig_personil_cluster = make_subplots(rows=2, cols=1, specs=[[{'type':'bar'}], [{'type':'domain'}]],
-                        subplot_titles=('Jumlah Personil BKAP DPW per Cluster', 'Persentase Distribusi DPW per Cluster'))
+                        subplot_titles=('Jumlah Personil BKAP DPW per Klaster', 'Distribusi DPW per Klaster'))
 
     personil_per_dpw_sorted = personil_per_dpw.sort_values(by=['Cluster_Label', 'Personil'], ascending=[True, True])
     bar_chart_personil = go.Bar(
@@ -231,7 +231,7 @@ if not df.empty:
     fig_personil_cluster.add_trace(pie_chart_personil, row=2, col=1)
 
     fig_personil_cluster.update_layout(
-        title_text='Analisis Clustering Jumlah Personil BKAP DPW',
+#        title_text='Analisis Clustering Jumlah Personil BKAP DPW',
         height=1200,
         showlegend=False
     )
@@ -240,7 +240,7 @@ if not df.empty:
     st.plotly_chart(fig_personil_cluster, use_container_width=True)
 
     # --- Biro Clustering ---
-    st.subheader('Analisis Clustering Jumlah Biro yang Dibentuk BKAP DPW')
+    st.subheader('Klaster BKAP DPW Berdasarkan Jumlah Biro yang Dibentuk')
     df['Biro'] = df['Biro'].fillna('')
     biro_exploded = df.assign(Biro=df['Biro'].str.split(', ')).explode('Biro')
     biro_exploded['Biro'] = biro_exploded['Biro'].str.strip()
@@ -277,7 +277,7 @@ if not df.empty:
     biro_cluster_counts['Formatted_DPW_List'] = biro_cluster_counts['DPW_List'].apply(format_dpw_list)
 
     fig_biro_cluster = make_subplots(rows=2, cols=1, specs=[[{'type':'bar'}], [{'type':'domain'}]],
-                        subplot_titles=('Jumlah Biro BKAP DPW per Cluster', 'Persentase Distribusi DPW per Cluster'))
+                        subplot_titles=('Jumlah Biro BKAP DPW per Klaster', 'Distribusi DPW per Klaster'))
 
     biro_counts_per_dpw_sorted = biro_counts_per_dpw.sort_values(by=['Biro_Cluster_Label', 'Jumlah_Biro'], ascending=[True, True])
     bar_chart_biro = go.Bar(
@@ -311,9 +311,9 @@ if not df.empty:
     fig_biro_cluster.add_trace(pie_chart_biro, row=2, col=1)
 
     fig_biro_cluster.update_layout(
-        title_text='Analisis Clustering Jumlah Biro yang Dibentuk BKAP DPW',
+#        title_text='Analisis Clustering Jumlah Biro yang Dibentuk BKAP DPW',
         height=1200,
-        showlegend=False
+        showlegend=True
     )
     fig_biro_cluster.update_xaxes(title_text="DPW", row=1, col=1)
     fig_biro_cluster.update_yaxes(title_text="Jumlah Biro", row=1, col=1)
@@ -332,7 +332,7 @@ if not df.empty:
     }
 
     # UPA Utama
-    st.subheader('Analisis Terlaksananya UPA Utama dan Kehadiran Pembimbing')
+    st.subheader('Terlaksananya UPA Utama dan Kehadiran Pembimbing')
     upa_utama_counts = df['UPAU'].value_counts().reset_index()
     upa_utama_counts.columns = ['Status UPA Utama', 'Jumlah DPW']
     upa_utama_counts['Persentase'] = (upa_utama_counts['Jumlah DPW'] / len(df)) * 100
@@ -386,11 +386,13 @@ if not df.empty:
         textinfo='percent+label'
     ), 1, 2)
 
-    fig_upa_utama.update_layout(title_text='Analisis Terlaksananya UPA Utama dan Kehadiran Pembimbing', height=600)
+    fig_upa_utama.update_layout(
+    #title_text='Analisis Terlaksananya UPA Utama dan Kehadiran Pembimbing', 
+    height=600)
     st.plotly_chart(fig_upa_utama, use_container_width=True)
 
     # UPA Dewasa
-    st.subheader('Analisis Terlaksananya UPA Dewasa dan Kehadiran Pembimbing')
+    st.subheader('Terlaksananya UPA Dewasa dan Kehadiran Pembimbing')
     upa_dewasa_counts = df['UPAD'].value_counts().reset_index()
     upa_dewasa_counts.columns = ['Status UPA Dewasa', 'Jumlah DPW']
     upa_dewasa_counts['Persentase'] = (upa_dewasa_counts['Jumlah DPW'] / len(df)) * 100
@@ -444,11 +446,13 @@ if not df.empty:
         textinfo='percent+label'
     ), 1, 2)
 
-    fig_upa_dewasa.update_layout(title_text='Analisis Terlaksananya UPA Dewasa dan Kehadiran Pembimbing', height=600)
+    fig_upa_dewasa.update_layout(
+    #title_text='Analisis Terlaksananya UPA Dewasa dan Kehadiran Pembimbing', 
+      height=600)
     st.plotly_chart(fig_upa_dewasa, use_container_width=True)
 
     # UPA Madya
-    st.subheader('Analisis Terlaksananya UPA Madya dan Kehadiran Pembimbing')
+    st.subheader('Terlaksananya UPA Madya dan Kehadiran Pembimbing')
     upa_madya_counts = df['UPAM'].value_counts().reset_index()
     upa_madya_counts.columns = ['Status UPA Madya', 'Jumlah DPW']
     upa_madya_counts['Persentase'] = (upa_madya_counts['Jumlah DPW'] / len(df)) * 100
@@ -502,7 +506,9 @@ if not df.empty:
         textinfo='percent+label'
     ), 1, 2)
 
-    fig_upa_madya.update_layout(title_text='Analisis Terlaksananya UPA Madya dan Kehadiran Pembimbing', height=600)
+    fig_upa_madya.update_layout(
+    #title_text='Analisis Terlaksananya UPA Madya dan Kehadiran Pembimbing', 
+       height=600)
     st.plotly_chart(fig_upa_madya, use_container_width=True)
 
 
@@ -529,7 +535,7 @@ if not df.empty:
         sapulidi_counts,
         values='Persentase',
         names='Status Sapulidi',
-        title='Progress Pembaharuan Data Anggota dan UPA di Aplikasi Sapulidi',
+#        title='Progress Pembaharuan Data Anggota dan UPA di Aplikasi Sapulidi',
         color='Status Sapulidi',
         color_discrete_map=sapulidi_color_map,
         hole=0.3,
@@ -569,7 +575,7 @@ if not df.empty:
         x='Jumlah DPW',
         y='Fitur',
         orientation='h',
-        title='Penggunaan Fitur Sapulidi',
+ #       title='Penggunaan Fitur Sapulidi',
         labels={
             'Jumlah DPW': 'Jumlah DPW yang Menggunakan',
             'Fitur': 'Fitur Sapulidi'
