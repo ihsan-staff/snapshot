@@ -205,7 +205,7 @@ if not df.empty:
         y=personil_per_dpw_sorted['Personil'],
         marker_color=personil_per_dpw_sorted['Cluster_Label'].map(cluster_color_map),
         name='Jumlah Personil per DPW',
-        showlegend=True,
+        showlegend=False,
         hovertemplate=
             "<b>DPW</b>: %{x}<br>" +
             "<b>Jumlah Personil</b>: %{y}<br>" +
@@ -285,7 +285,7 @@ if not df.empty:
         y=biro_counts_per_dpw_sorted['Jumlah_Biro'],
         marker_color=biro_counts_per_dpw_sorted['Biro_Cluster_Label'].map(biro_cluster_color_map),
         name='Jumlah Biro per DPW',
-        showlegend=True,
+        showlegend=False,
         hovertemplate=
             "<b>DPW</b>: %{x}<br>" +
             "<b>Jumlah Biro</b>: %{y}<br>" +
