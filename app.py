@@ -331,26 +331,24 @@ if not df.empty:
         'Data tidak tersedia': '#7f7f7f'
     }
 
-    #REKRUTMEN
-    # Ensure 'Rekrutmen' column is processed (if not already from prior execution)
-    st.subheader('Program Rekrutmen')
+    # --- Rekapitulasi Program Rekrutmen ---
+    st.subheader('Rekapitulasi Program Rekrutmen BKAP DPW')
     df['Rekrutmen'] = df['Rekrutmen'].fillna('')
     rekrutmen_exploded = df.assign(Rekrutmen=df['Rekrutmen'].str.split(', ')).explode('Rekrutmen')
     rekrutmen_exploded['Rekrutmen'] = rekrutmen_exploded['Rekrutmen'].str.strip()
     rekrutmen_exploded = rekrutmen_exploded[rekrutmen_exploded['Rekrutmen'] != '']
 
-    # Calculate the count of each recruitment program
     rekrutmen_counts = rekrutmen_exploded['Rekrutmen'].value_counts().reset_index()
     rekrutmen_counts.columns = ['Program Rekrutmen', 'Jumlah DPW']
 
-    # Aggregate DPW list for each program
     dpw_list_by_rekrutmen = rekrutmen_exploded.groupby('Rekrutmen')['DPW'].apply(lambda x: ', '.join(x.unique())).reset_index(name='DPW_List')
     rekrutmen_counts = pd.merge(rekrutmen_counts, dpw_list_by_rekrutmen, left_on='Program Rekrutmen', right_on='Rekrutmen', how='left')
     rekrutmen_counts = rekrutmen_counts.drop(columns=['Rekrutmen'], errors='ignore')
+    
+    # Add formatted DPW list for display
+    rekrutmen_counts['Formatted_DPW_List'] = rekrutmen_counts['DPW_List'].apply(format_dpw_list)
+    st.dataframe(rekrutmen_counts.drop(columns=['DPW_List']), use_container_width=True)
 
-    # Display the recapitulation in a table format
-    print("### Rekapitulasi Program Rekrutmen BKAP DPW")
-    display(rekrutmen_counts)
 
     # UPA Utama
     st.subheader('Terlaksananya UPA Utama dan Kehadiran Pembimbing')
