@@ -711,7 +711,7 @@ if not df.empty:
     comprehensive_color_map = {
         'DPW Sangat Besar & Sangat Aktif': '#EF5000',
         'DPW Besar & Aktif': 'green',
-        'DPW Besar & Aktif': 'blue',
+        'DPW Sedang & Cukup Aktif': 'blue',
         'DPW Kecil & Kurang Aktif': 'red'
     }
 
