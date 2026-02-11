@@ -319,18 +319,6 @@ if not df.empty:
     fig_biro_cluster.update_yaxes(title_text="Jumlah Biro", row=1, col=1)
     st.plotly_chart(fig_biro_cluster, use_container_width=True)
 
-    # --- Bagian 2: UPA Pelopor ---
-    st.header('Bagian 2: UPA Pelopor')
-
-    upa_color_map = {
-        'Lengkap 100%': '#EF5000',
-        'Lebih dari 80%': '#2ca02c',
-        'Lebih dari 60%': '#1f77b4',
-        'Lebih dari 40%': '#9467bd',
-        'Kurang dari 40%': '#d62728',
-        'Data tidak tersedia': '#7f7f7f'
-    }
-
     # --- Rekapitulasi Program Rekrutmen ---
     st.subheader('Rekapitulasi Program Rekrutmen BKAP DPW')
     df['Rekrutmen'] = df['Rekrutmen'].fillna('')
@@ -349,6 +337,18 @@ if not df.empty:
     rekrutmen_counts['Formatted_DPW_List'] = rekrutmen_counts['DPW_List'].apply(format_dpw_list)
     st.dataframe(rekrutmen_counts.drop(columns=['DPW_List']), use_container_width=True)
 
+
+    # --- Bagian 2: UPA Pelopor ---
+    st.header('Bagian 2: UPA Pelopor')
+
+    upa_color_map = {
+        'Lengkap 100%': '#EF5000',
+        'Lebih dari 80%': '#2ca02c',
+        'Lebih dari 60%': '#1f77b4',
+        'Lebih dari 40%': '#9467bd',
+        'Kurang dari 40%': '#d62728',
+        'Data tidak tersedia': '#7f7f7f'
+    }
 
     # UPA Utama
     st.subheader('Terlaksananya UPA Utama dan Kehadiran Pembimbing')
