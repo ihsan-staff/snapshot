@@ -160,7 +160,7 @@ if not df.empty:
 
     st.title('Dashboard Snapshot BKAP DPW')
     total_responden = len(df)  
-    st.subheader(f"Total responden: {total_responden}")
+    st.header(f"Total responden: {total_responden}")
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
