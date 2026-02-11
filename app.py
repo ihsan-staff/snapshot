@@ -160,10 +160,10 @@ if not df.empty:
 
     st.title('Dashboard Snapshot BKAP DPW')
     total_responden = len(df)  
-    st.header(f"Total responden: {total_responden}")
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
+    st.header(f"Total responden: {total_responden}")
 
     st.subheader('Jenjang Keanggotaan yang dikelola BKAP DPW')
     df['Jenjang'] = df['Jenjang'].fillna('')
