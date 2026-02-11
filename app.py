@@ -8,6 +8,7 @@ import gspread
 #from google.colab import auth
 import google.auth
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 st.set_page_config(layout="wide")
@@ -24,27 +25,15 @@ def format_dpw_list(dpw_string, max_per_line=4):
 
 @st.cache_data(ttl=3600) # Cache data for 1 hour
 def load_data():
-    # Otorisasi Google Colab untuk mengakses Google Drive Anda
-#    auth.authenticate_user()
-
-    # Dapatkan kredensial yang diautentikasi dari Google Colab
-#    credentials, project = google.auth.default()
-
-    # Buat client gspread menggunakan kredensial
-#    gc = gspread.Client(auth=credentials)
-
-    # Masukkan URL Google Sheet Anda di sini
-#    gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/edit?resourcekey=&gid=2051840082#gid=2051840082"
+    # In Streamlit Cloud, you typically authenticate with st.secrets or a service account.
+    # For local Colab execution, you might have used auth.authenticate_user() previously.
+    # For simplicity and broad compatibility with external deployment, let's use a public CSV export URL if available
+    # or prompt the user for credentials if full gspread features are strictly needed.
+    
+    # Using the gviz/tq endpoint for public access to CSV data
+    gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/gviz/tq?tqx=out:csv"
 
     try:
-        # Buka spreadsheet berdasarkan URL
-#        spreadsheet = gc.open_by_url(gsheet_url)
-#        worksheet = spreadsheet.worksheet(spreadsheet.worksheets()[0].title) # Mengambil worksheet pertama
-#        data = worksheet.get_all_records()
-	
-        gsheet_url = "https://docs.google.com/spreadsheets/d/1hg0PuNymzzMp1CslB11XDulzAZR5BPOIYkxFkWHDCDU/gviz/tq?tqx=out:csv"	
-#        df = pd.DataFrame(data)
-
         df = pd.read_csv(gsheet_url)
         df = df.rename(columns={
             'Email Address': 'Email',
@@ -64,7 +53,16 @@ def load_data():
             'Rata-rata terlaksananya UPA Madya': 'UPAM',
             'Rata-rata kehadiran pembimbing dalam pelaksanaan UPA Madya': 'PembimbingAM',
             'Apakah data Anggota dan data UPA sudah  diperbaharui pada aplikasi Sapulidi?': 'Sapulidi',
-            'Beri tanda centang pada fitur Sapulidi yang sudah anda gunakan': 'Fitur'
+            'Beri tanda centang pada fitur Sapulidi yang sudah anda gunakan': 'Fitur',
+            'Rata-rata kejelasan Anggota UPA terhadap konsep, kerangka, arah kebijakan dan strategi Kurikulum 1447 H': 'Kejelasan_Konsep_UPA',
+            'Rata-rata suasana ukhuwah di UPA': 'Suasana_Ukhuwah_UPA',
+            'Rata-rata suasana dakwah harakiyah di UPA': 'Suasana_Dakwah_Harakiyah_UPA',
+            'Rata-rata suasana ilmiah tsaqafiyah di UPA': 'Suasana_Ilmiah_Tsaqafiyah_UPA',
+            'Rata-rata tingkat kemampuan ekonomi Anggota UPA': 'Tingkat_Ekonomi_UPA',
+            'Rata-rata terselesaikannya qadhayah Anggota UPA': 'Qadhayah_Anggota_UPA',
+            'Rata-rata jumlah Anggota UPA yang sedang bertugas menjadi Pembina UPA Penggerak': 'Jml_Pembina_UPA_Penggerak',
+            'Rata-rata program rekrutmen Anggota Muda di UPA': 'Program_Rekrutmen_Anggota_Muda',
+            'Rata-rata implementasi Kurikulum 1447 H di UPA': 'Implementasi_Kurikulum_UPA'
         })
 
         return df
@@ -73,11 +71,93 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
+# --- Comprehensive Clustering Logic (must be performed here to reuse df) ---
+@st.cache_data(ttl=3600)
+def perform_comprehensive_clustering(df_input):
+    df_preprocessed = df_input.copy()
+    df_preprocessed = df_preprocessed.set_index('DPW')
+
+    numerical_cols = [
+        'Personil', 'Internal', 'Rakor', 'KunKer', 'Kejelasan_Konsep_UPA'
+    ]
+
+    for col in numerical_cols:
+        df_preprocessed[col] = pd.to_numeric(df_preprocessed[col], errors='coerce')
+        df_preprocessed[col] = df_preprocessed[col].fillna(df_preprocessed[col].mean())
+
+    multi_choice_dfs = []
+    multi_choice_cols = ['Jenjang', 'Biro', 'Rekrutmen', 'Fitur']
+    for col in multi_choice_cols:
+        df_preprocessed[col] = df_preprocessed[col].fillna('')
+        exploded_df = df_preprocessed.assign(temp_col=df_preprocessed[col].str.split(', ')).explode('temp_col')
+        exploded_df['temp_col'] = exploded_df['temp_col'].str.strip()
+        exploded_df = exploded_df[exploded_df['temp_col'] != '']
+        dummies = pd.get_dummies(exploded_df['temp_col'], prefix=col)
+        processed_multi_choice = exploded_df.reset_index()[['DPW']].join(dummies).groupby('DPW').sum()
+        multi_choice_dfs.append(processed_multi_choice)
+
+    single_choice_cols = [
+        'Program', 'UPAU', 'PembimbingAU', 'UPAD', 'PembimbingAD', 'UPAM',
+        'PembimbingAM', 'Sapulidi', 'Suasana_Ukhuwah_UPA', 'Suasana_Dakwah_Harakiyah_UPA',
+        'Suasana_Ilmiah_Tsaqafiyah_UPA', 'Tingkat_Ekonomi_UPA', 'Qadhayah_Anggota_UPA',
+        'Jml_Pembina_UPA_Penggerak', 'Program_Rekrutmen_Anggota_Muda',
+        'Implementasi_Kurikulum_UPA'
+    ]
+
+    single_choice_encoded_df = pd.DataFrame(index=df_preprocessed.index)
+    for col in single_choice_cols:
+        df_preprocessed[col] = df_preprocessed[col].fillna('Missing')
+        dummies = pd.get_dummies(df_preprocessed[col], prefix=col)
+        single_choice_encoded_df = single_choice_encoded_df.join(dummies)
+
+    final_df_for_clustering = df_preprocessed[numerical_cols].copy()
+    for processed_df in multi_choice_dfs:
+        final_df_for_clustering = final_df_for_clustering.merge(processed_df, left_index=True, right_index=True, how='left')
+    final_df_for_clustering = final_df_for_clustering.merge(single_choice_encoded_df, left_index=True, right_index=True, how='left')
+    final_df_for_clustering = final_df_for_clustering.fillna(0)
+
+    scaler = StandardScaler()
+    scaled_numerical_features = scaler.fit_transform(final_df_for_clustering[numerical_cols])
+    scaled_numerical_df = pd.DataFrame(scaled_numerical_features, columns=[f"Scaled_{col}" for col in numerical_cols], index=final_df_for_clustering.index)
+    final_df_for_clustering_scaled = scaled_numerical_df.join(final_df_for_clustering.drop(columns=numerical_cols))
+
+    k_optimal_comprehensive = 4 # Based on previous Elbow/Silhouette analysis
+    kmeans_comprehensive = KMeans(n_clusters=k_optimal_comprehensive, random_state=42, n_init='auto')
+    kmeans_comprehensive.fit(final_df_for_clustering_scaled)
+    final_df_for_clustering_scaled['Comprehensive_Cluster_Label'] = kmeans_comprehensive.labels_
+
+    cluster_labels_df = final_df_for_clustering_scaled.reset_index()[['DPW', 'Comprehensive_Cluster_Label']]
+    df_with_comprehensive_clusters = df_input.merge(cluster_labels_df, on='DPW', how='left')
+
+    cluster_characterization_df = final_df_for_clustering.reset_index().merge(
+        final_df_for_clustering_scaled[['Comprehensive_Cluster_Label']].reset_index(),
+        on='DPW',
+        how='left'
+    )
+
+    cluster_summary_numerical = cluster_characterization_df.groupby('Comprehensive_Cluster_Label')[numerical_cols].mean().reset_index()
+    cluster_summary_numerical = cluster_summary_numerical.sort_values(by='Personil').reset_index(drop=True)
+
+    cluster_names_comprehensive = {
+        cluster_summary_numerical.loc[0, 'Comprehensive_Cluster_Label']: 'DPW Kecil & Kurang Aktif',
+        cluster_summary_numerical.loc[1, 'Comprehensive_Cluster_Label']: 'DPW Sedang & Cukup Aktif',
+        cluster_summary_numerical.loc[2, 'Comprehensive_Cluster_Label']: 'DPW Besar & Aktif',
+        cluster_summary_numerical.loc[3, 'Comprehensive_Cluster_Label']: 'DPW Sangat Besar & Sangat Aktif'
+    }
+
+    df_with_comprehensive_clusters['Comprehensive_Cluster_Name'] = df_with_comprehensive_clusters['Comprehensive_Cluster_Label'].map(cluster_names_comprehensive)
+    cluster_characterization_df['Comprehensive_Cluster_Name'] = cluster_characterization_df['Comprehensive_Cluster_Label'].map(cluster_names_comprehensive)
+    final_cluster_summary = cluster_characterization_df.groupby('Comprehensive_Cluster_Name')[numerical_cols].agg(['mean', 'count', 'min', 'max'])
+    
+    return df_with_comprehensive_clusters, final_cluster_summary
+
 
 # --- Load Data ---
 df = load_data()
 
 if not df.empty:
+    df_with_comprehensive_clusters, final_cluster_summary = perform_comprehensive_clustering(df.copy())
+
     st.title('Dashboard Snapshot BKAP DPW')
 
     # --- Bagian 1: Kepengurusan ---
@@ -612,4 +692,43 @@ if not df.empty:
             "<b>DPW</b>: %{customdata[0]}<extra></extra>"
     )
     st.plotly_chart(fig_bar_fitur, use_container_width=True)
+
+    # --- Comprehensive Clustering Visualization ---
+    st.header('Analisis Klaster Komprehensif DPW')
+    st.subheader('Sebaran Klaster DPW Berdasarkan Seluruh Aspek Data')
+
+    # Display summary table
+    st.write("### Ringkasan Karakteristik Klaster Komprehensif")
+    st.dataframe(final_cluster_summary.round(2))
+    
+    # Bar chart for distribution of DPWs per comprehensive cluster
+    comprehensive_cluster_counts = df_with_comprehensive_clusters['Comprehensive_Cluster_Name'].value_counts().reset_index()
+    comprehensive_cluster_counts.columns = ['Comprehensive_Cluster_Name', 'Jumlah_DPW']
+    dpw_list_per_comprehensive_cluster = df_with_comprehensive_clusters.groupby('Comprehensive_Cluster_Name')['DPW'].apply(lambda x: ', '.join(x.unique())).reset_index(name='DPW_List')
+    comprehensive_cluster_counts = pd.merge(comprehensive_cluster_counts, dpw_list_per_comprehensive_cluster, on='Comprehensive_Cluster_Name')
+    comprehensive_cluster_counts['Formatted_DPW_List'] = comprehensive_cluster_counts['DPW_List'].apply(format_dpw_list)
+
+    fig_bar_comprehensive_clusters = px.bar(
+        comprehensive_cluster_counts,
+        x='Comprehensive_Cluster_Name',
+        y='Jumlah_DPW',
+        color='Comprehensive_Cluster_Name',
+        title='Distribusi DPW per Klaster Komprehensif',
+        labels={
+            'Comprehensive_Cluster_Name': 'Nama Klaster',
+            'Jumlah_DPW': 'Jumlah DPW'
+        },
+        height=600,
+        text_auto=True,
+        hover_data={'Formatted_DPW_List': True}
+    )
+    fig_bar_comprehensive_clusters.update_traces(
+        hovertemplate=
+            "<b>Klaster</b>: %{x}<br>" +
+            "<b>Jumlah DPW</b>: %{y}<br>" +
+            "<b>DPW</b>: %{customdata[0]}"
+    )
+    fig_bar_comprehensive_clusters.update_layout(xaxis_tickangle=-45)
+    st.plotly_chart(fig_bar_comprehensive_clusters, use_container_width=True)
+
     
