@@ -162,7 +162,7 @@ if not df.empty:
     total_responden = df.shape[0]  
 
     # --- Bagian 1: Kepengurusan ---
-    st.header('Bagian 1: Kepengurusan')
+    #st.header('Bagian 1: Kepengurusan')
     #st.header(f'Total responden: {total_responden}')
     st.header('Tes')
 
