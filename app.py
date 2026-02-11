@@ -694,8 +694,8 @@ if not df.empty:
     st.plotly_chart(fig_bar_fitur, use_container_width=True)
 
     # --- Comprehensive Clustering Visualization ---
-    st.header('Analisis Klaster Komprehensif DPW')
-    st.subheader('Sebaran Klaster DPW Berdasarkan Seluruh Aspek Data')
+    st.header('Analisis Klaster Komprehensif BKAP DPW')
+    st.subheader('Sebaran Klaster BKAP DPW Berdasarkan Seluruh Aspek Data')
 
     # Display summary table
     st.write("### Ringkasan Karakteristik Klaster Komprehensif")
