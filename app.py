@@ -720,7 +720,7 @@ if not df.empty:
         x='Comprehensive_Cluster_Name',
         y='Jumlah_DPW',
         color='Comprehensive_Cluster_Name',
-        color_map = comprehensive_color_map,
+        color_discrete_map = comprehensive_color_map,
         title='Distribusi DPW per Klaster Komprehensif',
         labels={
             'Comprehensive_Cluster_Name': 'Nama Klaster',
