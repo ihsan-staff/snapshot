@@ -708,11 +708,19 @@ if not df.empty:
     comprehensive_cluster_counts = pd.merge(comprehensive_cluster_counts, dpw_list_per_comprehensive_cluster, on='Comprehensive_Cluster_Name')
     comprehensive_cluster_counts['Formatted_DPW_List'] = comprehensive_cluster_counts['DPW_List'].apply(format_dpw_list)
 
+    comprehensive_color_map = {
+        'DPW Sangat Besar & Sangat Aktif': '#EF5000',
+        'DPW Besar & Aktif': 'green',
+        'DPW Besar & Aktif': 'blue',
+        'DPW Kecil & Kurang Aktif': 'red'
+    }
+
     fig_bar_comprehensive_clusters = px.bar(
         comprehensive_cluster_counts,
         x='Comprehensive_Cluster_Name',
         y='Jumlah_DPW',
         color='Comprehensive_Cluster_Name',
+        color_map = comprehensive_color_map,
         title='Distribusi DPW per Klaster Komprehensif',
         labels={
             'Comprehensive_Cluster_Name': 'Nama Klaster',
