@@ -163,7 +163,8 @@ if not df.empty:
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
-    st.header(f'Total responden: {total_responden}')
+    #st.header(f'Total responden: {total_responden}')
+    st.header('Tes')
 
     st.subheader('Jenjang Keanggotaan yang dikelola BKAP DPW')
     df['Jenjang'] = df['Jenjang'].fillna('')
