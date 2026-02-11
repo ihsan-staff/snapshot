@@ -704,6 +704,7 @@ if not df.empty:
     # Bar chart for distribution of DPWs per comprehensive cluster
     comprehensive_cluster_counts = df_with_comprehensive_clusters['Comprehensive_Cluster_Name'].value_counts().reset_index()
     comprehensive_cluster_counts.columns = ['Comprehensive_Cluster_Name', 'Jumlah_DPW']
+    comprehensive_cluster_counts['Persentase'] = (comprehensive_cluster_counts['Jumlah_DPW'] / len(df)) * 100
     dpw_list_per_comprehensive_cluster = df_with_comprehensive_clusters.groupby('Comprehensive_Cluster_Name')['DPW'].apply(lambda x: ', '.join(x.unique())).reset_index(name='DPW_List')
     comprehensive_cluster_counts = pd.merge(comprehensive_cluster_counts, dpw_list_per_comprehensive_cluster, on='Comprehensive_Cluster_Name')
     comprehensive_cluster_counts['Formatted_DPW_List'] = comprehensive_cluster_counts['DPW_List'].apply(format_dpw_list)
@@ -733,7 +734,7 @@ if not df.empty:
     fig_bar_comprehensive_clusters.update_traces(
         hovertemplate=
             "<b>Klaster</b>: %{x}<br>" +
-            "<b>Jumlah DPW</b>: %{y}<br>" +
+            "<b>Persentase DPW</b>: %{value:.2f}%<br>" +
             "<b>DPW</b>: %{customdata[0]}"
     )
     fig_bar_comprehensive_clusters.update_layout(xaxis_tickangle=-45)
