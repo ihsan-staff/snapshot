@@ -159,8 +159,8 @@ if not df.empty:
     df_with_comprehensive_clusters, final_cluster_summary = perform_comprehensive_clustering(df.copy())
 
     st.title('Dashboard Snapshot BKAP DPW')
-    total_responden = "Total responden: " + str(len(df))  
-    st.subheader(total_responden)
+    total_responden = len(df)  
+    st.subheader(f"Total responden: {total_responden}")
 
     # --- Bagian 1: Kepengurusan ---
     st.header('Bagian 1: Kepengurusan')
